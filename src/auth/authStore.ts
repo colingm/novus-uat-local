@@ -124,13 +124,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
-    const visitor = get().currentVisitor
-    const workspace = get().currentWorkspace
     if (typeof pendo !== 'undefined') {
-      pendo.track('signout_completed', {
-        visitorId: visitor?.id ?? '',
-        workspaceId: workspace?.id ?? '',
-      })
       pendo.clearSession()
     }
     get().clearSession()
