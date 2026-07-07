@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Halo</title>
+    <!-- Mantine ColorSchemeScript (auto): sets data-mantine-color-scheme on <html>
+         before paint to prevent dark-mode FOUC. SPA-only (no SSR), so this inline
+         script is the equivalent of Mantine v9's <ColorSchemeScript defaultColorScheme="auto" />.
+         Resolution order:
+           1. localStorage['mantine-color-scheme-value']  ('light' | 'dark' | 'auto')
+           2. If absent or 'auto': window.matchMedia('(prefers-color-scheme: dark)')
+           3. Else: 'light'
+         Wrapped in IIFE + try/catch — private-browsing environments throw on
+         localStorage.getItem access (T-04-01-02). -->
+    <script>
+      (function () {
+        try {
+          var stored = null;
+          try { stored = window.localStorage.getItem('mantine-color-scheme-value'); } catch (e) { stored = null; }
+          var scheme = stored;
+          if (scheme !== 'light' && scheme !== 'dark') {
+            scheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-mantine-color-scheme', scheme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-mantine-color-scheme', 'light');
+        }
+      })();
+    </script>
+    <script>
+      (function(apiKey){
+          (function(p,e,n,d,o){var v,w,x,y,z;o=p[d]=p[d]||{};o._q=o._q||[];
+          v=['initialize','identify','updateOptions','pageLoad','track', 'trackAgent'];for(w=0,x=v.length;w<x;++w)(function(m){
+          o[m]=o[m]||function(){o._q[m===v[0]?'unshift':'push']([m].concat([].slice.call(arguments,0)));};})(v[w]);
+          y=e.createElement(n);y.async=!0;y.src='https://cdn.pendo-dev.pendo-dev.com/agent/static/'+apiKey+'/pendo.js';
+          z=e.getElementsByTagName(n)[0];z.parentNode.insertBefore(y,z);})(window,document,'script','pendo');
+      })('03a98922-4dbd-487e-b660-8d7923037fb7');
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

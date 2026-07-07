@@ -1,0 +1,197 @@
+/**
+ * Signup wizard — Step 2 (About you).
+ *
+ * AUTH-03 + step-2 half of AUTH-06. Captures Job title / Role / Years of
+ * experience / Location. Renders the locked UI-SPEC heading `A bit about you`.
+ *
+ * Gates entry on `hasStep(draft, 'step1')` — deep-linking without prior
+ * step-1 completion silently redirects to `/signup`. On valid submit,
+ * advances to `/signup/company`. Back navigates to `/signup`, persisting
+ * current values (even invalid) into the draft per UI-SPEC's
+ * `Back does NOT re-validate.` rule.
+ *
+ * Mirrors Plan 02-07's Step1AccountPage shape: RHF + zodResolver(step2Schema)
+ * + sessionStorage rehydration + wrapped Mantine primitives + PENDO_IDS leaves.
+ * Step 2 differs by adding a Back button (variant="default", no color prop —
+ * renders gray per UI-SPEC `Color > Forbidden uses of indigo`).
+ *
+ * The bottom-of-form `Sign in` footer anchor is rendered by `SignupShell` for
+ * every step — DO NOT re-render it here.
+ *
+ * No `pendo.*` runtime is invoked; `data-pendo-id` markup is inert until
+ * Phase 6 retrofits the agent.
+ */
+
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Navigate, useNavigate } from 'react-router'
+import { Stack, Group, Title } from '@mantine/core'
+import { TextInput, Select, NumberInput, Button } from '../../../ui/primitives'
+import { PENDO_IDS } from '../../../pendo/PENDO_IDS'
+import {
+  step2Schema,
+  type Step2Values,
+  readWizardDraft,
+  writeWizardDraftStep,
+  hasStep,
+} from '../../../auth'
+
+const ROLE_OPTIONS = [
+  'Product',
+  'Engineering',
+  'Design',
+  'Marketing',
+  'Sales',
+  'Operations',
+  'Other',
+] as const
+
+export function Step2DetailsPage(): React.JSX.Element {
+  const navigate = useNavigate()
+  const draft = readWizardDraft()
+
+  // Gate: must have completed step 1 first. Deep-linking to /signup/details
+  // without step-1 data redirects silently to the wizard root.
+  if (!hasStep(draft, 'step1')) {
+    return <Navigate to="/signup" replace />
+  }
+
+  const form = useForm<Step2Values>({
+    resolver: zodResolver(step2Schema),
+    // Validation fires on Continue click — matches UI-SPEC "validates on Next" rhythm.
+    mode: 'onSubmit',
+    defaultValues: {
+      jobTitle: '',
+      // role + yearsExperience are non-optional in Step2Values but start
+      // empty (undefined) at form mount; the per-field cast surfaces the
+      // hole locally instead of laundering it through a `Partial<X> as X`
+      // pair of casts that hides every other field's mismatch too (WR-02).
+      role: undefined as unknown as Step2Values['role'],
+      yearsExperience: undefined as unknown as number,
+      location: '',
+      ...(draft.step2 ?? {}),
+    },
+  })
+
+  const onSubmit = form.handleSubmit((values) => {
+    writeWizardDraftStep('step2', values)
+    if (typeof pendo !== 'undefined') {
+      pendo.track('signup_step2_completed', {
+        jobTitle: values.jobTitle,
+        role: values.role,
+        yearsExperience: values.yearsExperience,
+        hasLocation: values.location.length > 0,
+      })
+    }
+    navigate('/signup/company')
+  })
+
+  const onBack = () => {
+    // Per UI-SPEC: Back persists current values (even invalid) into the draft,
+    // then navigates. This is `Back does NOT re-validate` — typed but
+    // unsubmitted input is preserved across step navigation.
+    writeWizardDraftStep('step2', form.getValues() as Partial<Step2Values>)
+    navigate('/signup')
+  }
+
+  return (
+    <Stack gap="md">
+      <Title order={2}>A bit about you</Title>
+      <form onSubmit={onSubmit} noValidate>
+        <Stack gap="md">
+          <TextInput
+            {...form.register('jobTitle')}
+            label="Job title"
+            placeholder="Senior product manager"
+            error={form.formState.errors.jobTitle?.message}
+            pendoId={PENDO_IDS.signup.step2.jobTitle}
+          />
+          <Select
+            label="Role"
+            placeholder="Select your role"
+            data={[...ROLE_OPTIONS]}
+            value={form.watch('role') ?? null}
+            onChange={(value) => {
+              // Mantine's Select hands back `string | null`. On clear (null)
+              // we MUST write undefined so the schema's RoleEnum mismatch
+              // surfaces the locked "Pick the closest role." copy via
+              // z.number({message}) — NOT '' which would type-lie as a
+              // valid RoleEnum value (WR-02). On a non-null value we
+              // narrow via the runtime enum-membership check; an unknown
+              // string also falls to undefined (defensive — Mantine should
+              // only ever hand us a value from `data`, but a future
+              // creatable Select could).
+              if (value === null) {
+                form.setValue('role', undefined as unknown as Step2Values['role'], {
+                  shouldValidate: false,
+                })
+                return
+              }
+              const isKnown = (ROLE_OPTIONS as readonly string[]).includes(value)
+              form.setValue(
+                'role',
+                isKnown
+                  ? (value as Step2Values['role'])
+                  : (undefined as unknown as Step2Values['role']),
+                { shouldValidate: false },
+              )
+            }}
+            error={form.formState.errors.role?.message}
+            pendoId={PENDO_IDS.signup.step2.role}
+          />
+          <NumberInput
+            label="Years of experience"
+            placeholder="5"
+            min={0}
+            max={60}
+            value={form.watch('yearsExperience') ?? ''}
+            onChange={(value) => {
+              // Mantine's NumberInput hands back '' (empty string) when the
+              // user clears the field. Coercing '' → Number('') → 0 would
+              // silently write a value the user never typed AND would bypass
+              // the locked "Enter a number — …" copy on z.number({message}).
+              // Preserve `undefined` for empty / non-numeric input so the
+              // schema's z.number typecheck fires the locked Zod copy.
+              if (value === '' || value === null || value === undefined) {
+                form.setValue(
+                  'yearsExperience',
+                  undefined as unknown as number,
+                  { shouldValidate: false },
+                )
+                return
+              }
+              const n = typeof value === 'number' ? value : Number(value)
+              form.setValue(
+                'yearsExperience',
+                Number.isFinite(n) ? n : (undefined as unknown as number),
+                { shouldValidate: false },
+              )
+            }}
+            error={form.formState.errors.yearsExperience?.message}
+            pendoId={PENDO_IDS.signup.step2.yearsExperience}
+          />
+          <TextInput
+            {...form.register('location')}
+            label="Location"
+            placeholder="Berlin, Germany"
+            error={form.formState.errors.location?.message}
+            pendoId={PENDO_IDS.signup.step2.location}
+          />
+          <Group justify="space-between" mt="xl">
+            <Button
+              type="button"
+              variant="default"
+              onClick={onBack}
+              pendoId={PENDO_IDS.signup.step2.back}
+            >Back</Button>
+            <Button
+              type="submit"
+              loading={form.formState.isSubmitting}
+              pendoId={PENDO_IDS.signup.step2.submit}
+            >Continue</Button>
+          </Group>
+        </Stack>
+      </form>
+    </Stack>
+  )
+}

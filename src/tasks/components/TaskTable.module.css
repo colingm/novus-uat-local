@@ -1,0 +1,21 @@
+/**
+ * TaskTable cell padding — per 04-UI-SPEC §"TanStack Table (Lists)":
+ *
+ *   padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+ *   (vertical sm = 12px, horizontal md = 16px)
+ *
+ * Uses Mantine spacing CSS-vars only — no raw px values per UI-SPEC §Spacing.
+ */
+
+.taskTable {
+  width: 100%;
+}
+
+.cell {
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+}
+
+.headerButton {
+  width: 100%;
+  text-align: left;
+}
