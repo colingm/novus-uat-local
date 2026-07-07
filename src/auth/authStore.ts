@@ -124,7 +124,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
-    console.log('signOut called')
     if (typeof pendo !== 'undefined') pendo.clearSession()
     get().clearSession()
     clearWizardDraft()
