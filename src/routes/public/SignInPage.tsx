@@ -84,11 +84,6 @@ export function SignInPage(): React.JSX.Element {
     // modes (Plan 02-05 collapses "user not found", "wrong password", and the
     // defensive "missing workspace" branch into one variant — username
     // enumeration mitigation T-02-45 at the API surface).
-    if (typeof pendo !== 'undefined') {
-      pendo.track('signin_failed', {
-        failureReason: result.reason,
-      })
-    }
     setCredError(result.reason)
   })
 
