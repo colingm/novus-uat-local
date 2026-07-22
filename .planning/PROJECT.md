@@ -33,7 +33,18 @@ A convincing, multi-page SaaS surface that a Pendo customer or pre-sales enginee
 
 <!-- Current scope. Building toward these. -->
 
-(None — v1.0 shipped. Run `/gsd-new-milestone` to define the next milestone scope.)
+- Agent chat surface wired to the real Claude API, for exercising Pendo agent/AI analytics — *targeted for v1.1*
+
+## Current Milestone: v1.1 Agent Chat
+
+**Goal:** Add an in-app AI assistant chat surface wired to the real Claude API so Pendo agent analytics (track events, funnels, session replay, feature adoption) can be exercised against a genuine LLM conversation instead of scripted/fabricated exchanges.
+
+**Target features:**
+- Chat UI (open/close panel or dedicated page) styled to match the Halo shell
+- Real Claude API calls from the browser using a build-time Anthropic API key (`.env`, gitignored, read via `import.meta.env`)
+- Message history persisted to localStorage (versioned, consistent with existing storage pattern)
+- `data-pendo-id` selectors on all key chat elements
+- Track events for key chat actions (open chat, send message, receive response, error/failure)
 
 ### Dropped
 
@@ -78,7 +89,7 @@ A convincing, multi-page SaaS surface that a Pendo customer or pre-sales enginee
 
 ## Constraints
 
-- **Tech stack**: Frontend-only SPA — no backend, no API server, no database. All persistence is `localStorage` (or `sessionStorage` where appropriate).
+- **Tech stack**: Frontend-only SPA — no backend, no API server, no database. All persistence is `localStorage` (or `sessionStorage` where appropriate). Exception (v1.1): direct browser-to-Anthropic-API calls for the agent chat feature are allowed — this is a third-party API call, not a backend/API server the app hosts itself.
 - **Tech stack**: Framework is React or Svelte, decided based on ecosystem fit for SaaS UI + charting.
 - **Data**: All data is fabricated. Registration data is captured into local storage; charts/lists are seeded with fake data and mutated locally.
 - **Pendo readiness**: Markup must include stable identifiers / data attributes on key UI so Pendo guides can target them reliably. Pendo Snippet must be initialized with visitor + account IDs from the registration flow.
@@ -99,6 +110,7 @@ A convincing, multi-page SaaS surface that a Pendo customer or pre-sales enginee
 | SaaS-grade visual polish via a real UI library | Convincing demos require a real-looking surface | ✓ Good — Mantine 9 chosen, dark mode wired, all pages pass the "screenshot test" |
 | React over Svelte (settled in Phase 1 research) | Deepest SaaS + charting ecosystem; matches Pendo's customer base | ✓ Good — React 19 + Mantine 9 + Recharts shipped without ecosystem friction |
 | Phase 6 (Pendo Install & Wiring) removed from v1.0 scope (2026-05-18) | Pendo runtime wiring not needed for v1.0 demo target; markup affordances are enough | — Pending — revisit if a future milestone wants live Pendo |
+| Agent chat calls the real Claude API directly from the browser, key supplied via build-time `.env` (2026-07-22) | Real LLM responses give authentic agent analytics signal (varied timing, content, errors) that scripted fake responses can't; build-time env var was chosen over runtime key entry since this app is never deployed publicly | — Pending — key is visible in the compiled bundle; acceptable only because this build stays local/internal |
 
 ## Evolution
 
@@ -118,4 +130,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-18 after v1.0 milestone shipped — 5 phases, 37 plans, all v1.0 requirements complete or explicitly dropped. Phase 6 (Pendo runtime wiring) removed from scope; Pendo-ready markup ships throughout.*
+*Last updated: 2026-07-22 — started milestone v1.1 (Agent Chat), scoping a Claude-API-backed chat surface for Pendo agent analytics testing.*
