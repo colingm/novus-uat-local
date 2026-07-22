@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { Outlet, useLocation, useNavigate, Navigate } from 'react-router'
+import React, { useEffect } from "react";
+import { Outlet, useLocation, useNavigate, Navigate } from "react-router";
 import {
   AppShell,
   Group,
@@ -11,7 +11,7 @@ import {
   Menu,
   UnstyledButton,
   useComputedColorScheme,
-} from '@mantine/core'
+} from "@mantine/core";
 import {
   IconLayoutDashboard,
   IconChecklist,
@@ -22,11 +22,11 @@ import {
   IconChevronDown,
   IconUser,
   IconLogout,
-} from '@tabler/icons-react'
-import { NavLink } from '../../ui/primitives'
-import { PENDO_IDS } from '../../pendo/PENDO_IDS'
-import { useAuthStore } from '../../auth'
-import { seedDemoData } from '../../seed/seedAll'
+} from "@tabler/icons-react";
+import { NavLink } from "../../ui/primitives";
+import { PENDO_IDS } from "../../pendo/PENDO_IDS";
+import { useAuthStore } from "../../auth";
+import { seedDemoData } from "../../seed/seedAll";
 
 /**
  * Active-route detection helper (per D-12 and UI-SPEC §"Navbar contents").
@@ -44,15 +44,15 @@ import { seedDemoData } from '../../seed/seedAll'
 function isNavActive(
   pathname: string,
   target:
-    | '/app'
-    | '/app/lists'
-    | '/app/reports'
-    | '/app/team'
-    | '/app/settings'
-    | '/app/help',
+    | "/app"
+    | "/app/lists"
+    | "/app/reports"
+    | "/app/team"
+    | "/app/settings"
+    | "/app/help",
 ): boolean {
-  if (target === '/app') return pathname === '/app'
-  return pathname.startsWith(target)
+  if (target === "/app") return pathname === "/app";
+  return pathname.startsWith(target);
 }
 
 /**
@@ -66,11 +66,11 @@ function isNavActive(
  * Pendo. Phase 3 deliberately does not include it.
  */
 export function AppLayout(): React.JSX.Element {
-  const { pathname } = useLocation()
-  const navigate = useNavigate()
-  const visitor = useAuthStore((s) => s.currentVisitor)
-  const workspace = useAuthStore((s) => s.currentWorkspace)
-  const colorScheme = useComputedColorScheme('light')
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const visitor = useAuthStore((s) => s.currentVisitor);
+  const workspace = useAuthStore((s) => s.currentWorkspace);
+  const colorScheme = useComputedColorScheme("light");
 
   /**
    * Phase 3 D-04: seeding is gated on meta.seededAt; subsequent mounts are
@@ -80,27 +80,33 @@ export function AppLayout(): React.JSX.Element {
    * §"Pattern S2").
    */
   useEffect(() => {
-    if (workspace) seedDemoData(workspace.id)
-  }, [workspace?.id])
+    if (workspace) seedDemoData(workspace.id);
+  }, [workspace?.id]);
 
   // Defensive narrowing — RequireAuth (Phase 2 lock) already redirects
   // unauthenticated users before AppLayout mounts. This Navigate is
   // belt-and-suspenders for TypeScript narrowing: it ensures visitor and
   // workspace are non-null for all subsequent JSX references.
-  if (!visitor || !workspace) return <Navigate to="/signin" replace />
+  if (!visitor || !workspace) return <Navigate to="/signin" replace />;
 
-  const initials = `${visitor.firstName[0] ?? ''}${visitor.lastName[0] ?? ''}`.toUpperCase()
+  const initials =
+    `${visitor.firstName[0] ?? ""}${visitor.lastName[0] ?? ""}`.toUpperCase();
 
   const handleSignOut = async () => {
+    // Track signout BEFORE pendo.clearSession() (called inside signOut()) so
+    // the event is associated with the active visitor session.
+    if (typeof pendo !== "undefined") {
+      pendo.track("signout_completed", {});
+    }
     // Navigate first so RequireAuth doesn't intercept the synchronous
     // isAuthenticated:false flush from signOut() and bounce through /signin.
-    navigate('/', { replace: true })
-    await useAuthStore.getState().signOut()
-  }
+    navigate("/", { replace: true });
+    await useAuthStore.getState().signOut();
+  };
 
   return (
     <AppShell
-      navbar={{ width: 240, breakpoint: 'sm' }}
+      navbar={{ width: 240, breakpoint: "sm" }}
       header={{ height: 56 }}
       padding="md"
     >
@@ -109,7 +115,11 @@ export function AppLayout(): React.JSX.Element {
           {/* Left: wordmark aligned to navbar column width */}
           <Box w={208}>
             <Image
-              src={colorScheme === 'dark' ? '/halo-logo-dark.png' : '/halo-logo.png'}
+              src={
+                colorScheme === "dark"
+                  ? "/halo-logo-dark.png"
+                  : "/halo-logo.png"
+              }
               alt="Halo"
               h={32}
               w="auto"
@@ -119,12 +129,18 @@ export function AppLayout(): React.JSX.Element {
           </Box>
           {/* Right: workspace name + user menu trigger */}
           <Group gap="md">
-            <Text size="sm" c="dimmed" data-pendo-id={PENDO_IDS.topbar.workspaceName}>
+            <Text
+              size="sm"
+              c="dimmed"
+              data-pendo-id={PENDO_IDS.topbar.workspaceName}
+            >
               {workspace.companyName}
             </Text>
             <Menu>
               <Menu.Target>
-                <UnstyledButton data-pendo-id={PENDO_IDS.topbar.userMenu.button}>
+                <UnstyledButton
+                  data-pendo-id={PENDO_IDS.topbar.userMenu.button}
+                >
                   <Group gap={8}>
                     <Avatar size="sm" color="indigo" radius="xl">
                       {initials}
@@ -140,14 +156,14 @@ export function AppLayout(): React.JSX.Element {
                 <Menu.Item
                   leftSection={<IconUser size={16} />}
                   data-pendo-id={PENDO_IDS.topbar.userMenu.profile}
-                  onClick={() => navigate('/app/settings?tab=profile')}
+                  onClick={() => navigate("/app/settings?tab=profile")}
                 >
                   Profile
                 </Menu.Item>
                 <Menu.Item
                   leftSection={<IconSettings size={16} />}
                   data-pendo-id={PENDO_IDS.topbar.userMenu.settings}
-                  onClick={() => navigate('/app/settings')}
+                  onClick={() => navigate("/app/settings")}
                 >
                   Settings
                 </Menu.Item>
@@ -171,49 +187,49 @@ export function AppLayout(): React.JSX.Element {
             pendoId={PENDO_IDS.nav.dashboard}
             label="Dashboard"
             leftSection={<IconLayoutDashboard size={18} stroke={1.6} />}
-            active={isNavActive(pathname, '/app')}
+            active={isNavActive(pathname, "/app")}
             variant="light"
-            onClick={() => navigate('/app')}
+            onClick={() => navigate("/app")}
           />
           <NavLink
             pendoId={PENDO_IDS.nav.lists}
             label="Lists"
             leftSection={<IconChecklist size={18} stroke={1.6} />}
-            active={isNavActive(pathname, '/app/lists')}
+            active={isNavActive(pathname, "/app/lists")}
             variant="light"
-            onClick={() => navigate('/app/lists')}
+            onClick={() => navigate("/app/lists")}
           />
           <NavLink
             pendoId={PENDO_IDS.nav.reports}
             label="Reports"
             leftSection={<IconChartBar size={18} stroke={1.6} />}
-            active={isNavActive(pathname, '/app/reports')}
+            active={isNavActive(pathname, "/app/reports")}
             variant="light"
-            onClick={() => navigate('/app/reports')}
+            onClick={() => navigate("/app/reports")}
           />
           <NavLink
             pendoId={PENDO_IDS.nav.team}
             label="Team"
             leftSection={<IconUsers size={18} stroke={1.6} />}
-            active={isNavActive(pathname, '/app/team')}
+            active={isNavActive(pathname, "/app/team")}
             variant="light"
-            onClick={() => navigate('/app/team')}
+            onClick={() => navigate("/app/team")}
           />
           <NavLink
             pendoId={PENDO_IDS.nav.settings}
             label="Settings"
             leftSection={<IconSettings size={18} stroke={1.6} />}
-            active={isNavActive(pathname, '/app/settings')}
+            active={isNavActive(pathname, "/app/settings")}
             variant="light"
-            onClick={() => navigate('/app/settings')}
+            onClick={() => navigate("/app/settings")}
           />
           <NavLink
             pendoId={PENDO_IDS.nav.help}
             label="Help"
             leftSection={<IconHelpCircle size={18} stroke={1.6} />}
-            active={isNavActive(pathname, '/app/help')}
+            active={isNavActive(pathname, "/app/help")}
             variant="light"
-            onClick={() => navigate('/app/help')}
+            onClick={() => navigate("/app/help")}
           />
         </Stack>
       </AppShell.Navbar>
@@ -222,5 +238,5 @@ export function AppLayout(): React.JSX.Element {
         <Outlet />
       </AppShell.Main>
     </AppShell>
-  )
+  );
 }
