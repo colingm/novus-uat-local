@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-13)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: — (implemented directly, no formal phase/plan for this milestone)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-22 — Milestone v1.1 started
+Status: v1.1 Agent Chat implemented and Playwright-verified
+Last activity: 2026-07-22 — Agent chat (Claude API, launcher/panel, Pendo instrumentation) shipped
 
 ## Performance Metrics
 
