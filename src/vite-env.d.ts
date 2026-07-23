@@ -2,11 +2,7 @@
 
 declare var pendo: any;
 
-interface ImportMetaEnv {
-  /** Anthropic API key for the Agent Chat feature (src/chat). Set in .env, never committed. */
-  readonly VITE_ANTHROPIC_API_KEY?: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
+// Note: the Agent Chat feature's ANTHROPIC_API_KEY deliberately has NO VITE_
+// prefix and is read server-side only, in vite.config.ts's dev proxy plugin
+// (via `loadEnv`) — never through `import.meta.env` in client code. See
+// src/chat/claudeClient.ts for why (CORS + key-exposure rationale).
