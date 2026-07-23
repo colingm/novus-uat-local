@@ -28,12 +28,24 @@ A convincing, multi-page SaaS surface that a Pendo customer or pre-sales enginee
 - ✓ Help page (searchable articles + detail view + persistent "?" anchor for Pendo Resource Center) — *v1.0 (Phase 5)*
 - ✓ SaaS-grade visual polish (Mantine 9 + Halo theme + light/dark mode + branded logo) — *v1.0 (Phase 5 polish pass + branding follow-ups)*
 - ✓ Stable DOM identifiers / data attributes on every interactive element — *v1.0 (PENDO_IDS registry, PEN-07..09)*
+- ✓ Agent chat surface wired to the real Claude API (floating launcher + panel, streaming replies, localStorage-persisted history, `data-pendo-id` coverage, `pendo.track` on open/send/receive/error/clear) — *v1.1*
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-(None — v1.0 shipped. Run `/gsd-new-milestone` to define the next milestone scope.)
+(None — v1.1 Agent Chat implemented and verified. Run `/gsd-new-milestone` to define the next milestone scope.)
+
+## Current Milestone: v1.1 Agent Chat
+
+**Goal:** Add an in-app AI assistant chat surface wired to the real Claude API so Pendo agent analytics (track events, funnels, session replay, feature adoption) can be exercised against a genuine LLM conversation instead of scripted/fabricated exchanges.
+
+**Target features:**
+- Chat UI (open/close panel or dedicated page) styled to match the Halo shell
+- Real Claude API calls from the browser using a build-time Anthropic API key (`.env`, gitignored, read via `import.meta.env`)
+- Message history persisted to localStorage (versioned, consistent with existing storage pattern)
+- `data-pendo-id` selectors on all key chat elements
+- Track events for key chat actions (open chat, send message, receive response, error/failure)
 
 ### Dropped
 
@@ -78,7 +90,7 @@ A convincing, multi-page SaaS surface that a Pendo customer or pre-sales enginee
 
 ## Constraints
 
-- **Tech stack**: Frontend-only SPA — no backend, no API server, no database. All persistence is `localStorage` (or `sessionStorage` where appropriate).
+- **Tech stack**: Frontend-only SPA — no backend, no API server, no database. All persistence is `localStorage` (or `sessionStorage` where appropriate). Exception (v1.1): the agent chat feature's Claude API calls are proxied through a dev-only Vite middleware (`vite.config.ts`) rather than made directly from the browser — the target Anthropic organization has CORS disabled, so direct browser calls are rejected regardless of key validity. This is dev-tooling, not a hosted backend; it doesn't exist in a built/deployed bundle.
 - **Tech stack**: Framework is React or Svelte, decided based on ecosystem fit for SaaS UI + charting.
 - **Data**: All data is fabricated. Registration data is captured into local storage; charts/lists are seeded with fake data and mutated locally.
 - **Pendo readiness**: Markup must include stable identifiers / data attributes on key UI so Pendo guides can target them reliably. Pendo Snippet must be initialized with visitor + account IDs from the registration flow.
@@ -99,6 +111,8 @@ A convincing, multi-page SaaS surface that a Pendo customer or pre-sales enginee
 | SaaS-grade visual polish via a real UI library | Convincing demos require a real-looking surface | ✓ Good — Mantine 9 chosen, dark mode wired, all pages pass the "screenshot test" |
 | React over Svelte (settled in Phase 1 research) | Deepest SaaS + charting ecosystem; matches Pendo's customer base | ✓ Good — React 19 + Mantine 9 + Recharts shipped without ecosystem friction |
 | Phase 6 (Pendo Install & Wiring) removed from v1.0 scope (2026-05-18) | Pendo runtime wiring not needed for v1.0 demo target; markup affordances are enough | — Pending — revisit if a future milestone wants live Pendo |
+| Agent chat calls the real Claude API directly from the browser, key supplied via build-time `.env` (2026-07-22) | Real LLM responses give authentic agent analytics signal (varied timing, content, errors) that scripted fake responses can't; build-time env var was chosen over runtime key entry since this app is never deployed publicly | ✗ Superseded same day — this org has CORS disabled, so direct browser calls return a CORS `authentication_error` regardless of key. Replaced by the dev-server-proxy decision below. |
+| Agent chat routes Claude API calls through a Vite dev-server proxy (`vite.config.ts` middleware) instead of calling Anthropic directly from the browser (2026-07-22) | The org's CORS-disabled setting makes direct browser calls unworkable, and enabling CORS org-wide was rejected as too broad a change for a side demo; a server-to-server call from the Vite dev process sidesteps CORS entirely and is strictly more secure — `ANTHROPIC_API_KEY` (no `VITE_` prefix) never reaches the browser bundle at all | ✓ Good — Playwright-verified end-to-end after the fix; dev-server-only by design, consistent with "local dev server is sufficient for demos" |
 
 ## Evolution
 
@@ -118,4 +132,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-18 after v1.0 milestone shipped — 5 phases, 37 plans, all v1.0 requirements complete or explicitly dropped. Phase 6 (Pendo runtime wiring) removed from scope; Pendo-ready markup ships throughout.*
+*Last updated: 2026-07-22 — milestone v1.1 (Agent Chat) implemented and verified: floating chat launcher + panel wired to the real Claude API, streaming replies, localStorage-persisted history, full Pendo markup + track-event coverage. Formal REQUIREMENTS.md/ROADMAP.md were skipped for this milestone in favor of direct implementation.*

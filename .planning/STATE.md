@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: Awaiting next milestone
-stopped_at: Phase 5 context gathered
-last_updated: "2026-05-18T15:07:33.464Z"
-last_activity: 2026-05-18 — Milestone v1.0 completed and archived
+milestone: v1.1
+milestone_name: Agent Chat
+status: planning
+last_updated: "2026-07-22T20:31:44.582Z"
+last_activity: 2026-07-22
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 37
-  completed_plans: 37
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -25,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-13)
 
 ## Current Position
 
-Phase: Milestone v1.0 complete
+Phase: — (implemented directly, no formal phase/plan for this milestone)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-05-18 — Milestone v1.0 completed and archived
+Status: v1.1 Agent Chat implemented and Playwright-verified
+Last activity: 2026-07-22 — Agent chat (Claude API, launcher/panel, Pendo instrumentation) shipped
 
 ## Performance Metrics
 

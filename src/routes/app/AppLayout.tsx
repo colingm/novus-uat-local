@@ -27,6 +27,7 @@ import { NavLink } from "../../ui/primitives";
 import { PENDO_IDS } from "../../pendo/PENDO_IDS";
 import { useAuthStore } from "../../auth";
 import { seedDemoData } from "../../seed/seedAll";
+import { ChatLauncher } from "../../chat";
 
 /**
  * Active-route detection helper (per D-12 and UI-SPEC §"Navbar contents").
@@ -237,6 +238,8 @@ export function AppLayout(): React.JSX.Element {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+
+      <ChatLauncher />
     </AppShell>
   );
 }
