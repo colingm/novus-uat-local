@@ -23,7 +23,7 @@
  * comment markers in ProfileTab/WorkspaceTab.
  */
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useSearchParams } from 'react-router'
 import { Stack, Tabs, Title } from '@mantine/core'
 import { PENDO_IDS } from '../../../pendo/PENDO_IDS'
@@ -48,6 +48,15 @@ function parseTab(raw: string | null): TabValue {
 export function SettingsPage(): React.JSX.Element {
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = parseTab(searchParams.get('tab'))
+
+  // Stop collecting data while the visitor is on the Settings page and resume
+  // when they navigate away. The cleanup runs on unmount (route change).
+  useEffect(() => {
+    pendo.stopSendingEvents()
+    return () => {
+      pendo.startSendingEvents()
+    }
+  }, [])
 
   return (
     <Stack gap="lg">
