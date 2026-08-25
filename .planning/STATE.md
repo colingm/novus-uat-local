@@ -164,6 +164,7 @@ Recent decisions affecting current work:
 - [Phase ?]: Phase 04-07: keepMounted={false} chosen for TaskFormModal create-mode reset — one-line fix, no useEffect timing risk, RHF cleanup implicit on unmount
 - [Phase ?]: Phase 04-07: prevStatus field added as TaskStatusEnum.optional().nullable() — no SCHEMA_VERSION bump per D-26; additive+backwards-compatible with legacy tasks
 - [Phase ?]: Phase 04-07: UAT 2b resolved as doc-only fix — two-pass collect-then-remove in ResetDemoDataModal was already correct; planning_context live-mutation framing was a misread
+- Quick 260825-cn1: Halo deployable to GitHub Pages at colingm.github.io/novus-uat-local/ — vite.config.ts base gated on process.env.GITHUB_ACTIONS (single source of truth for the subpath), router basename + all src/ literals derive from import.meta.env.BASE_URL, dist/404.html emitted via build-only Vite plugin (not a postbuild script) as the SPA deep-link fallback, first-party actions/deploy-pages workflow with no repo secrets. Agent chat knowingly stays broken on the deployed site (user-accepted); repo Pages source must be manually switched to "GitHub Actions" (operator follow-up, cannot be automated).
 
 ### Pending Todos
 
@@ -180,6 +181,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260518-eta | Wire up logo PNGs as favicon and header logo | 2026-05-18 | db29694 | [260518-eta-wire-up-logo-pngs-as-favicon-and-header-](./quick/260518-eta-wire-up-logo-pngs-as-favicon-and-header-/) |
 | 260518-f3f | Add dark-mode header logo variant | 2026-05-18 | 0611a32 | [260518-f3f-add-dark-mode-header-logo-variant](./quick/260518-f3f-add-dark-mode-header-logo-variant/) |
+| 260825-cn1 | Deploy Halo to GitHub Pages as a static SPA (base-path build, 404 fallback, Actions Pages workflow) | 2026-08-25 | 81fea4d | [260825-cn1-deploy-halo-to-github-pages-as-a-static-](./quick/260825-cn1-deploy-halo-to-github-pages-as-a-static-/) |
 
 ## Deferred Items
 
@@ -202,9 +204,9 @@ UAT/verification items are manual click-through scenarios for a human walker —
 
 ## Session Continuity
 
-Last session: 2026-05-15T19:25:20.557Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-team-help-polish/05-CONTEXT.md
+Last session: 2026-08-25T13:18:52Z
+Stopped at: Completed quick task 260825-cn1-deploy-halo-to-github-pages-as-a-static-
+Resume file: None
 
 ## Operator Next Steps
 
