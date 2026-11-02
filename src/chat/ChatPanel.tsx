@@ -21,6 +21,31 @@ interface ChatPanelProps {
   onClose: () => void
 }
 
+/** Pendo Agent Analytics identifier for Halo Assistant. */
+const HALO_ASSISTANT_AGENT_ID = '_UDwxQ6gk4GSaA9BkcqT5CCsWgQ'
+
+interface TrackAgentMetadata {
+  conversationId: string
+  messageId: string
+  content: string
+  modelUsed?: string
+  suggestedPrompt?: boolean
+  toolsUsed?: string[]
+  fileUploaded?: boolean
+}
+
+/**
+ * Reports a Halo Assistant interaction to Pendo Agent Analytics. No-ops when
+ * the Pendo agent (or its trackAgent API) has not loaded.
+ */
+function trackAgent(
+  eventType: 'prompt' | 'agent_response' | 'user_reaction',
+  metadata: TrackAgentMetadata,
+): void {
+  if (typeof pendo === 'undefined' || typeof pendo.trackAgent !== 'function') return
+  pendo.trackAgent(eventType, { agentId: HALO_ASSISTANT_AGENT_ID, ...metadata })
+}
+
 /**
  * Agent chat panel — message history + input, wired to the real Claude API.
  * Rendered inside an Affix by ChatLauncher; persists across all /app/* routes
@@ -55,6 +80,18 @@ export function ChatPanel({ onClose }: ChatPanelProps): React.JSX.Element {
     const nextHistory = [...history, userMessage]
     setMessages(nextHistory)
 
+    // A conversation lasts until "New conversation" clears the history, so the
+    // id of its first persisted message identifies it — stable across panel
+    // close/reopen and page reloads, and fresh after every clear.
+    const conversationId = nextHistory[0].id
+    trackAgent('prompt', {
+      conversationId,
+      messageId: userMessage.id,
+      content: text,
+      suggestedPrompt: false,
+      fileUploaded: false,
+    })
+
     if (typeof pendo !== 'undefined') {
       pendo.track('agent_chat_message_sent', { messageLength: text.length })
     }
@@ -67,6 +104,11 @@ export function ChatPanel({ onClose }: ChatPanelProps): React.JSX.Element {
       )
       const assistantMessage = appendMessage(workspaceId, { role: 'assistant', content: fullReply })
       setMessages((prev) => [...prev, assistantMessage])
+      trackAgent('agent_response', {
+        conversationId,
+        messageId: assistantMessage.id,
+        content: fullReply,
+      })
       if (typeof pendo !== 'undefined') {
         pendo.track('agent_chat_response_received', { messageLength: fullReply.length })
       }
