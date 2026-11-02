@@ -85,6 +85,11 @@ export function SignInPage(): React.JSX.Element {
     // defensive "missing workspace" branch into one variant — username
     // enumeration mitigation T-02-45 at the API surface).
     console.log('Sign in failed:', result.reason)
+    // Track the failed credential check. Only the failure reason is sent —
+    // never the email or any other PII.
+    if (typeof pendo !== 'undefined') {
+      pendo.track('signin_failed', { reason: result.reason })
+    }
     setCredError(result.reason)
   })
 
