@@ -101,6 +101,25 @@ export function Step4PreferencesPage(): React.JSX.Element {
 
   const onSubmit = form.handleSubmit(async (step4Values) => {
     setSubmitError(null)
+
+    // Track a rejected/failed final signup submission. Company fields are read
+    // from the wizard draft (not the parsed s3) so the event still carries
+    // context when the failure is a step-3 re-validation throw. No PII is sent.
+    const trackSignupFailed = (
+      reason: 'generic_failure' | 'duplicate_email' | 'duplicate_username',
+    ) => {
+      if (typeof pendo === 'undefined') return
+      const step3 = readWizardDraft().step3
+      pendo.track('signup_failed', {
+        reason,
+        planTier: step3?.planTier ?? '',
+        companySize: step3?.companySize ?? '',
+        industry: step3?.industry ?? '',
+        primaryUseCase: step4Values.primaryUseCase,
+        teamSize: step4Values.teamSize,
+      })
+    }
+
     try {
       // Defense in depth — re-read the draft and re-validate every prior step
       // before write. Catches the race where a user opens DevTools mid-wizard
@@ -134,10 +153,12 @@ export function Step4PreferencesPage(): React.JSX.Element {
       // duplicate would write a second visitor that findVisitorByEmail
       // silently shadows. Surface as a form-level Alert and abort.
       if (findVisitorByEmail(s1.email)) {
+        trackSignupFailed('duplicate_email')
         setSubmitError('duplicate_email')
         return
       }
       if (findVisitorByUsername(s1.username)) {
+        trackSignupFailed('duplicate_username')
         setSubmitError('duplicate_username')
         return
       }
@@ -200,6 +221,7 @@ export function Step4PreferencesPage(): React.JSX.Element {
       // and stay on /signup/preferences. The wizard draft is intentionally NOT
       // cleared on failure — user can retry by clicking Create account again.
       console.error('[signup] completion failed:', err)
+      trackSignupFailed('generic_failure')
       setSubmitError('generic_failure')
     }
   })
